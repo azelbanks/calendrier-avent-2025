@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OP: PURPLE HEART // TERMINAL</title>
+    <style>
+        /* --- STYLE GENERAL & FONTS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --terminal-bg: #0d0d14;
+            --text-color: #a8b2d1;
+            --primary: #8a2be2; /* Purple Heart */
+            --accent: #00ff41; /* Hacker Green */
+            --error: #ff3333;
+            --border: #2d2d3a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%);
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+
+        /* --- SIDEBAR (Profil CV) --- */
+        .sidebar {
+            background: var(--terminal-bg);
+            border: 1px solid var(--primary);
+            padding: 20px;
+            height: fit-content;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.2);
+        }
+
+        .avatar {
+            width: 100%;
+            height: 150px;
+            background: #000;
+            border: 1px dashed var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 3em;
+        }
+
+        .info-block h3 {
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .info-block p {
+            font-size: 0.8em;
+            margin: 5px 0;
+            color: #fff;
+        }
+
+        .progress-container {
+            margin-top: 30px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- MAIN DASHBOARD --- */
+        .main-content {
+            background: rgba(13, 13, 20, 0.9);
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            color: #fff;
+            text-shadow: 0 0 5px var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .day-btn {
+            background: #111;
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            position: relative;
+        }
+
+        .day-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .day-btn.solved {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(0, 255, 65, 0.05);
+        }
+        
+        .day-btn.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: repeating-linear-gradient(45deg, #000, #000 10px, #111 10px, #111 20px);
+        }
+
+        .day-number { font-size: 1.5em; font-weight: bold; }
+        .day-status { font-size: 0.7em; margin-top: 5px; }
+
+        /* --- MODAL (TERMINAL) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .terminal-window {
+            width: 800px;
+            max-width: 90%;
+            background: #1a1a1a;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .terminal-header {
+            background: var(--primary);
+            color: #000;
+            padding: 5px 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            color: #ddd;
+        }
+
+        .code-block {
+            background: #000;
+            border-left: 3px solid var(--accent);
+            padding: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+            color: var(--accent);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: #000;
+            border: none;
+            border-bottom: 2px solid #555;
+            color: #fff;
+            padding: 10px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1em;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .close-btn { cursor: pointer; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .success-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .glitch-text {
+            font-size: 4em;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 2px 2px var(--primary);
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        /* LEVEL 2 HEADER */
+        .level-2-header {
+            margin-top: 50px;
+            border-top: 1px dashed var(--primary);
+            padding-top: 20px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="avatar">🛡️</div>
+        <div style="text-align: center; font-weight: bold; color:#fff;">TARGET: BRYAN</div>
+        <div style="text-align: center; font-size: 0.8em; color:var(--primary); font-weight:bold;">INGÉNIEUR PURPLE TEAM</div>
+        
+        <div class="info-block">
+            <h3>Mission Status</h3>
+            <p>> OP: PURPLE HEART</p>
+            <p>> Clearance: LEVEL 5</p>
+            <p>> Unit: 13 RDP (RESERVE)</p>
+        </div>
+
+        <div class="info-block">
+            <h3>Tech Stack</h3>
+            <p>• Rust / Python</p>
+            <p>• NixOS / Arch</p>
+            <p>• Burp Suite</p>
+            <p>• BloodHound</p>
+        </div>
+
+        <div class="info-block">
+            <h3>Progress</h3>
+            <p id="progress-text">0 / 24 FLAGS CAPTURED</p>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="main-progress"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>> ./init_sequence.sh --force</h1>
+        <p style="color: #666; margin-bottom: 30px;">// SYSTEM READY. WAITING FOR INPUT.</p>
+
+        <div class="grid" id="calendar-grid">
+            </div>
+
+        <div id="level-2-container" style="display:none;">
+            <h2 class="level-2-header">⚠️ LEVEL 2: BLACK OPS [25-31] ⚠️</h2>
+            <div class="grid" id="calendar-grid-l2">
+                </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="challenge-modal">
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <span id="modal-title">TERMINAL</span>
+            <span class="close-btn" onclick="closeModal()">[X]</span>
+        </div>
+        <div class="terminal-body">
+            <div style="color:var(--primary); font-size: 0.8em; margin-bottom: 10px;">CATEGORY: <span id="modal-cat"></span></div>
+            <p id="modal-desc"></p>
+            
+            <div id="input-area">
+                <input type="text" id="flag-input" placeholder="ENTER_FLAG_HERE..." autocomplete="off">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button class="action-btn" onclick="checkFlag()">> EXECUTE</button>
+                    <div style="font-size:0.8em; cursor:pointer; color:#555;" onclick="toggleHint()">[ SHOW HINT ]</div>
+                </div>
+                <div id="hint-text" style="display:none; color: #555; margin-top:10px; font-style:italic;"></div>
+                <p id="error-msg" style="color:var(--error); margin-top:10px; display:none;">> ACCESS DENIED. BAD FLAG.</p>
+            </div>
+
+            <div id="success-area" style="display:none;">
+                <div class="code-block" id="reward-content" style="color: var(--accent);"></div>
+                <div id="media-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="success-overlay" id="success-overlay">
+    <div class="glitch-text">ACCESS GRANTED</div>
+    <div style="color: #fff; margin-top: 20px;">UPDATING PRIVILEGES...</div>
+</div>
+
+<script>
+    // --- DONNEES DES CHALLENGES (TA LISTE COMPLETE) ---
+    const challenges = {
+        1: { cat: "DEFENSE_EVASION", title: "SURICATA_RULE", desc: "J'ai retrouvé cette règle IDS qui a trigger lors de notre première rencontre.<br>Quel est le contenu exact du payload détecté ?<br><span class='code-block'>alert tcp any any -> any 80 (msg:\"INITIAL_ACCESS\"; content:\"|43 48 45 4F 50 53|\"; sid:1000001; rev:1;)</span>", hint: "Hex to ASCII.", target: "CHEOPS", reward: "❤️ **Alert Confirmed.** Ce jour-là, aucune règle de pare-feu n'a pu bloquer ton entrée dans ma vie." },
+        2: { cat: "THREAT_HUNTING", title: "ELASTIC_KQL", desc: "Kickoff Marbella. Exploitation vulnérabilité publique.<br>Quel est l'ID MITRE ATT&CK pour 'Exploit Public-Facing Application' ?", hint: "Txxxx", target: "T1190", reward: "Faille critique exploitée : Mon cœur est maintenant exposé publiquement à toi." },
+        3: { cat: "REVERSE_ENGINEERING", title: "GHIDRA_DISASM", desc: "📍 TARGET: GROUND ZERO (Trapiche).<br>Fonction get_location().<br>MOV RAX, 0x5061647265205061<br>MOV RBX, 0x636F204F73746F73<br>Concatène RAX+RBX et convertis en ASCII.", hint: "Hex to String.", target: "PADRE PACO OSTOS", reward: "🔥 **0xPADRE_PACO_OSTOS**. L'adresse mémoire où mon stack a overflow." },
+        4: { cat: "NETWORK_FORENSICS", title: "WIRESHARK_PCAP", desc: "Analyse du trafic le 26 Septembre.<br>Si le TTL est à 0, que renvoie le routeur ?", hint: "Message ICMP.", target: "TIME EXCEEDED", reward: "Le temps était écoulé. On ne pouvait plus attendre." },
+        5: { cat: "HUMINT_OSINT", title: "SOCIAL_ENGINEERING", desc: "30 Septembre. Vecteur d'attaque : Psychologique.<br>Flag : L'anagramme de **M_A_P_H_I_T_E_Q_U_E**", hint: "Soft skill.", target: "EMPATHIQUE", reward: "Ton empathie est ton exploit le plus redoutable." },
+        6: { cat: "WEB_SECURITY", title: "BURPSUITE_HEADERS", desc: "Premier verre au Froufrou.<br>Quel header de sécurité manque et permet le Clickjacking ?", hint: "X-F...-O...", target: "X-FRAME-OPTIONS", reward: "IMAGE: https://media.giphy.com/media/l0HlOaQcLJ2hHpYcw/giphy.gif" },
+        7: { cat: "ACTIVE_DIRECTORY", title: "BLOODHOUND_PATH", desc: "19 Octobre. Domain Admin.<br>Quelle relation BloodHound permet le contrôle total d'un objet ?", hint: "Generic...", target: "GENERICALL", reward: "Je veux le GenericAll sur toi. Pas juste le ReadProperty." },
+        8: { cat: "MALWARE_ANALYSIS", title: "YARA_RULE", desc: "3 Novembre.<br>rule desire { strings: $a = \"body\" condition: ... }<br>Condition pour matcher si $a est trouvée ?", hint: "Juste le nom de la variable.", target: "$A", reward: "Match confirmé. Tu as scanné mon body." },
+        9: { cat: "PASSWORD_CRACKING", title: "HASHCAT_MODE", desc: "4 Novembre. Hash NTLMv2.<br>Quel Mode (-m) utiliser dans Hashcat ?", hint: "Code 4 chiffres.", target: "5600", reward: "Tu as bruteforcé mes insécurités." },
+        10: { cat: "C2_INFRASTRUCTURE", title: "COBALT_STRIKE", desc: "Profil malleable C2 par défaut qui imite jQuery ?", hint: "jquery-...", target: "JQUERY-C2.PROFILE", reward: "Mon C2 c'est toi. J'attends tes instructions." },
+        11: { cat: "DATA_ENCODING", title: "CYBERCHEF", desc: "8 Novembre. 'Sanctuaire'.<br>Recipe: To Base64 -> To Hex -> To Base64.<br>4 premiers caractères ?", hint: "CyberChef.", target: "NTM2", reward: "❤️ SANCTUAIRE. Notre VPN chiffré." },
+        12: { cat: "PYTHON_SCRIPTING", title: "ASSERTION_ERROR", desc: "14 Novembre.<br>assert Actions > Mots<br>Si faux, quelle exception ?", hint: "Nom de l'erreur.", target: "ASSERTIONERROR", reward: "Mes actes ne lèveront jamais d'exception." },
+        13: { cat: "CREDENTIAL_DUMPING", title: "LSASS_DUMP", desc: "Outil Sysinternals pour dumper un processus ?", hint: "Proc...", target: "PROCDUMP", reward: "Miaou. 🐈 (Flag extrait de lsass.dmp)" },
+        14: { cat: "RUST_PROGRAMMING", title: "MEMORY_SAFETY", desc: "Rust : Mécanisme contre les Race Conditions sur les données ?", hint: "M...", target: "MUTEX", reward: "Write Lock exclusif sur ton cœur." },
+        15: { cat: "GEOLOC", title: "WIFI_BSSID", desc: "MALAGA. Broadcast Address ?", hint: "FF...", target: "FF:FF:FF:FF:FF:FF", reward: "VIDEO: https://www.youtube.com/watch?v=dQw4w9WgXcQ" }, // EXEMPLE VIDEO
+        16: { cat: "PRIVESC", title: "GTFOBINS", desc: "Sudo vim. Commande pour shell ?", hint: ":!...", target: ":!/BIN/SH", reward: "Root access granted (1995)." },
+        17: { cat: "CRYPTOGRAPHY", title: "ROT13", desc: "Payload : GECB PUBH", hint: "ROT13", target: "TROP CHOU", reward: "Tu aimes quand je défends mon périmètre." },
+        18: { cat: "WINDOWS_INTERNALS", title: "SID_LOOKUP", desc: "RID par défaut Administrateur ?", hint: "500 ?", target: "500", reward: "User: Bryan | SID: ...-500" },
+        19: { cat: "LOOT", title: "DATA_EXFIL", desc: "Cadeau : Musique.", type: "loot", reward: "🎵 Playlist : [Insérer Lien]" },
+        20: { cat: "LOOT", title: "SOCIAL_ENG", desc: "Cadeau : Meme.", type: "loot", reward: "IMAGE: https://media.giphy.com/media/super/giphy.gif" },
+        21: { cat: "LOOT", title: "KEYLOGGER", desc: "Log du jour.", type: "loot", reward: "Tu me manques." },
+        22: { cat: "LOOT", title: "SNAPSHOT", desc: "Souvenir VM.", type: "loot", reward: "📸" },
+        23: { cat: "LOOT", title: "PATCH_TUESDAY", desc: "Mise à jour.", type: "loot", reward: "J-1." },
+        24: { cat: "APT_CAMPAIGN", title: "FINAL_PAYLOAD", desc: "Noël. Nom de code (Couleur + Team).", hint: "P... T...", target: "PURPLE TEAM", reward: "🎁 JOYEUX NOËL. APT 'Purple Team' installée." },
+        25: { cat: "THREAT_INTEL", title: "MISP_EVENT", desc: "Threat Level le plus bas dans MISP ?", hint: "Low...", target: "LOW", reward: "Aucune menace détectée." },
+        26: { cat: "WEB_FUZZING", title: "FFUF_FUZZ", desc: "ffuf. Code HTTP succès ?", hint: "200...", target: "200", reward: "Status 200 OK." },
+        27: { cat: "AD_ATTACK", title: "KERBEROASTING", desc: "Impacket outil TGS ?", hint: "GetU...", target: "GETUSERSPNS", reward: "Ticket Kerberos obtenu." },
+        28: { cat: "C2_FRAMEWORK", title: "SLIVER_C2", desc: "Sliver. Nom binaire par défaut ?", hint: "Sliver / Implant", target: "SLIVER", reward: "Implant déployé." },
+        29: { cat: "BINARY_EXPLOITATION", title: "BUFFER_OVERFLOW", desc: "Assembly : Jump to ESP ?", hint: "JMP...", target: "JMP ESP", reward: "Shellcode exécuté : Amour infini." },
+        30: { cat: "LATERAL_MOVEMENT", title: "WMI_EXEC", desc: "Port TCP WMI (DCOM) ?", hint: "135...", target: "135", reward: "Connexion établie." },
+        31: { cat: "CODE_REVIEW", title: "GIT_COMMIT", desc: "Modifier dernier commit ?", hint: "amend", target: "AMEND", reward: "🎆 BONNE ANNÉE 2026." }
+    };
+
+    // --- ETAT DU JEU ---
+    // Simuler une date pour le test (Décembre). Pour la prod, utiliser new Date().
+    const debugDate = new Date(); 
+    // const debugDate = new Date(2025, 11, 31); // Decommenter pour tout débloquer en mode test
+    
+    let solvedDays = JSON.parse(localStorage.getItem('solvedDays_bryan')) || [];
+    let currentDay = null;
+
+    function init() {
+        const grid1 = document.getElementById('calendar-grid');
+        const grid2 = document.getElementById('calendar-grid-l2');
+        
+        // Grid 1-24
+        for (let i = 1; i <= 24; i++) {
+            createDayBtn(i, grid1);
+        }
+
+        // Si le jour 24 est résolu, on affiche le niveau 2
+        if (solvedDays.includes(24)) {
+            document.getElementById('level-2-container').style.display = 'block';
+            for (let i = 25; i <= 31; i++) {
+                createDayBtn(i, grid2);
+            }
+        }
+        updateProgress();
+    }
+
+    function createDayBtn(day, container) {
+        const btn = document.createElement('div');
+        const isSolved = solvedDays.includes(day);
+        const isLocked = (debugDate.getMonth() !== 11) || (debugDate.getDate() < day); // Mois 11 = Décembre en JS
+
+        btn.className = `day-btn ${isSolved ? 'solved' : ''} ${isLocked && !isSolved ? 'locked' : ''}`;
+        
+        // Contenu visuel
+        let icon = isSolved ? '✅' : (isLocked ? '🔒' : '☠️');
+        if (day >= 25) icon = isSolved ? '💜' : (isLocked ? '🔒' : '💀');
+        
+        btn.innerHTML = `<div class="day-number">${day < 10 ? '0'+day : day}</div><div class="day-status">${icon}</div>`;
+        
+        if (!isLocked || isSolved) {
+            btn.onclick = () => openChallenge(day);
+        }
+        
+        container.appendChild(btn);
+    }
+
+    function openChallenge(day) {
+        currentDay = day;
+        const data = challenges[day];
+        const modal = document.getElementById('challenge-modal');
+        const isSolved = solvedDays.includes(day);
+
+        // Reset UI
+        document.getElementById('modal-title').innerText = `// DAY_${day} :: EXECUTING`;
+        document.getElementById('modal-cat').innerText = data.cat;
+        document.getElementById('modal-desc').innerHTML = data.desc;
+        document.getElementById('flag-input').value = "";
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('hint-text').style.display = 'none';
+        
+        const inputArea = document.getElementById('input-area');
+        const successArea = document.getElementById('success-area');
+
+        modal.style.display = 'flex';
+
+        // Logique Loot ou Déjà résolu
+        if (isSolved || data.type === 'loot') {
+            if (!isSolved) {
+                // Auto solve loot
+                solvedDays.push(day);
+                localStorage.setItem('solvedDays_bryan', JSON.stringify(solvedDays));
+                updateProgress();
+            }
+            showReward(data);
+        } else {
+            inputArea.style.display = 'block';
+            successArea.style.display = 'none';
+        }
+    }
+
+    function checkFlag() {
+        const input = document.getElementById('flag-input').value.trim().toUpperCase();
+        const data = challenges[currentDay];
+        
+        // On vérifie si la réponse est contenue dans le target (pour être flexible) ou exacte
+        if (input === data.target.toUpperCase()) {
+            // SUCCESS
+            triggerSuccessAnimation();
+            solvedDays.push(currentDay);
+            localStorage.setItem('solvedDays_bryan', JSON.stringify(solvedDays));
+            
+            setTimeout(() => {
+                showReward(data);
+                updateProgress();
+                // Si c'est le jour 24, recharger pour afficher le niveau 2
+                if (currentDay === 24) location.reload();
+            }, 2000);
+        } else {
+            // FAIL
+            document.getElementById('error-msg').style.display = 'block';
+            shakeModal();
+        }
+    }
+
+    function showReward(data) {
+        document.getElementById('input-area').style.display = 'none';
+        const successArea = document.getElementById('success-area');
+        const rewardContent = document.getElementById('reward-content');
+        const mediaContainer = document.getElementById('media-container');
+        
+        successArea.style.display = 'block';
+        
+        // Gestion du contenu (Image, Video, Texte)
+        let content = data.reward;
+        mediaContainer.innerHTML = ""; // Clear
+
+        if (content.startsWith("IMAGE:")) {
+            const url = content.replace("IMAGE:", "").trim();
+            mediaContainer.innerHTML = `<img src="${url}" style="max-width:100%; border:1px solid var(--primary); margin-top:10px;">`;
+            rewardContent.innerText = "> DECRYPTED IMAGE FILE.";
+        } else if (content.startsWith("VIDEO:")) {
+            const url = content.replace("VIDEO:", "").trim();
+            rewardContent.innerText = `> VIDEO LINK EXTRACTED: ${url}`;
+            // On pourrait embed youtube ici si besoin
+        } else {
+            rewardContent.innerHTML = content;
+        }
+    }
+
+    function triggerSuccessAnimation() {
+        const overlay = document.getElementById('success-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 2000);
+    }
+
+    function shakeModal() {
+        const win = document.querySelector('.terminal-window');
+        win.style.transform = 'translateX(10px)';
+        setTimeout(() => win.style.transform = 'translateX(-10px)', 50);
+        setTimeout(() => win.style.transform = 'translateX(10px)', 100);
+        setTimeout(() => win.style.transform = 'translateX(0)', 150);
+    }
+
+    function toggleHint() {
+        const hint = document.getElementById('hint-text');
+        hint.innerText = "> HINT: " + challenges[currentDay].hint;
+        hint.style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('challenge-modal').style.display = 'none';
+        location.reload(); // Refresh pour mettre à jour les grilles
+    }
+
+    function updateProgress() {
+        // Logique de surprise : Tant que le jour 24 n'est pas fait, on affiche sur 24.
+        const level2Unlocked = solvedDays.includes(24);
+        const total = level2Unlocked ? 31 : 24;
+        
+        const percent = (solvedDays.length / total) * 100;
+        document.getElementById('main-progress').style.width = percent + "%";
+        document.getElementById('progress-text').innerText = `${solvedDays.length} / ${total} FLAGS CAPTURED`;
+    }
+
+    // Enter key to submit
+    document.getElementById('flag-input').addEventListener("keypress", function(event) {
+        if (event.key === "Enter") checkFlag();
+    });
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>
