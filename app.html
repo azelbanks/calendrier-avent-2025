@@ -418,8 +418,17 @@
         "reward_type": "text",
         "reward": "👑 **DOMAIN ADMIN CONFIRMÉ.**<br>Le <b>17.10.2025</b>, tu as pris le contrôle total (GenericAll) sur l'objet <i>Coeur_Az</i>.<br>Plus de restrictions d'accès."
     },
-        8: { cat: "MALWARE_ANALYSIS", title: "YARA_RULE", desc: "3 Novembre.<br>rule desire { strings: $a = \"body\" condition: ... }<br>Condition pour matcher si $a est trouvée ?", hint: "Juste le nom de la variable.", target: "$A", reward: "Match confirmé. Tu as scanné mon body." },
-        9: { cat: "PASSWORD_CRACKING", title: "HASHCAT_MODE", desc: "4 Novembre. Hash NTLMv2.<br>Quel Mode (-m) utiliser dans Hashcat ?", hint: "Code 4 chiffres.", target: "5600", reward: "Tu as bruteforcé mes insécurités." },
+        8: {
+        "cat": "MALWARE_ANALYSIS",
+        "title": "STACK_STRING_DEOBFUSCATION",
+        "desc": "3 Novembre. Analyse statique.<br>Pour échapper à la détection (AV Evasion), je n'ai pas écrit mon désir en clair. Je l'ai construit dynamiquement en mémoire (Stack String).<br>Voici le désassemblage de la fonction d'initialisation :<br><br><code>C6 45 F0 42</code><br><code>C6 45 F1 6F</code><br><code>C6 45 F2 64</code><br><code>C6 45 F3 79</code><br><br>Reconstitue l'objet ASCII formé par ces instructions assembleur.",
+        "hint": "Architecture x86. Opcode C6 45 ?? XX = MOV BYTE PTR [EBP-??], XX. Regarde les valeurs immédiates (XX) à la fin de chaque ligne et convertis-les.",
+        "type": "exact_match",
+        "target": "BODY",
+        "reward_type": "text",
+        "reward": "🦠 **PAYLOAD RECONSTRUIT.**<br>Tu as su lire mon code source profond.<br>Tu as scanné et reconstruit mon **BODY**, instruction par instruction."
+    },
+     9: { cat: "PASSWORD_CRACKING", title: "HASHCAT_MODE", desc: "4 Novembre. Hash NTLMv2.<br>Quel Mode (-m) utiliser dans Hashcat ?", hint: "Code 4 chiffres.", target: "5600", reward: "Tu as bruteforcé mes insécurités." },
         10: { cat: "C2_INFRASTRUCTURE", title: "COBALT_STRIKE", desc: "Profil malleable C2 par défaut qui imite jQuery ?", hint: "jquery-...", target: "JQUERY-C2.PROFILE", reward: "Mon C2 c'est toi. J'attends tes instructions." },
         11: { cat: "DATA_ENCODING", title: "CYBERCHEF", desc: "8 Novembre. 'Sanctuaire'.<br>Recipe: To Base64 -> To Hex -> To Base64.<br>4 premiers caractères ?", hint: "CyberChef.", target: "NTM2", reward: "❤️ SANCTUAIRE. Notre VPN chiffré." },
         12: { cat: "PYTHON_SCRIPTING", title: "ASSERTION_ERROR", desc: "14 Novembre.<br>assert Actions > Mots<br>Si faux, quelle exception ?", hint: "Nom de l'erreur.", target: "ASSERTIONERROR", reward: "Mes actes ne lèveront jamais d'exception." },
